@@ -39,8 +39,11 @@ game_logs = playergamelog.PlayerGameLog(player_id = player_id, season = '2023', 
 
 game_logs_df = game_logs.get_data_frames()[0]
 
-# Step 4: User selects a statistic and displays a histogram
-if not game_logs_df.empty:
+# Check if there is data available
+if game_logs_df.empty:
+    st.write("No data available for the selected player.")
+else:
+    # Step 4: User selects a statistic and displays a histogram
     statistic = st.selectbox("Select a Statistic", ['PTS', 'AST', 'OREB', 'DREB', 'REB', 'MIN', 'FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
        'FT_PCT', 'STL', 'BLK', 'TOV', 'PF', 'PLUS_MINUS'])  # Selected Statistics
 
@@ -52,25 +55,29 @@ if not game_logs_df.empty:
     plt.ylabel("Frequency")
     st.pyplot(plt)
 
-mean_stat = round(np.mean(game_logs_df[statistic]),1)
-median_stat = round(np.median(game_logs_df[statistic]),1)
-min_stat = np.min(game_logs_df[statistic])
-max_stat = np.max(game_logs_df[statistic])
+    # Calculate and display key statistics
+    mean_stat = round(np.mean(game_logs_df[statistic]), 1)
+    median_stat = round(np.median(game_logs_df[statistic]), 1)
+    min_stat = np.min(game_logs_df[statistic])
+    max_stat = np.max(game_logs_df[statistic])
+    total_games = len(game_logs_df[statistic])
 
-# Print key stats
-st.write(f"{selected_player} averages {mean_stat} {statistic} per game.")
-st.write(f"Median {statistic} per game = {median_stat}")
-st.write(f"Minimum {statistic} was {min_stat} and maximum {statistic} was {max_stat}")
+    if total_games < 40:
+        st.markdown(f'<p style="color:red;">Warning: only {total_games} games in dataset.</p>', unsafe_allow_html=True)
+    else:
+        st.write(f"{total_games} games in dataset for {selected_player}.")
+    st.write(f"Mean {statistic} per game = {mean_stat}")
+    st.write(f"Median {statistic} per game = {median_stat}")
+    st.write(f"Minimum {statistic} was {min_stat} and maximum {statistic} was {max_stat}")
 
-# Step 5: Add a number input box
-st.header("Make a Prediction")
-user_input = st.number_input(f"Enter {statistic} value to calculate a prediction:", min_value=0, step=1)
+    # Step 5: Add a number input box
+    st.header("Make a Prediction")
+    user_input = st.number_input(f"Enter {statistic} value to calculate a prediction:", min_value=0, step=1)
 
-# Step 6: Calculate the quantile
-# Calculate the percentile for values less than the input
-percentile = percentileofscore(game_logs_df[statistic], user_input, kind='strict')
+    # Step 6: Calculate the quantile using numpy
+    less_than_input = np.sum(game_logs_df[statistic] < user_input)
 
-# Calculate the likelihood of scoring more than the input
-likelihood_more_than = 100 - percentile
+    # Calculate the likelihood of scoring more than the input
+    likelihood_more_than = (total_games - less_than_input) / total_games * 100
 
-st.write(f"The likelihood of {selected_player} getting {user_input} {statistic} or more in a game is {likelihood_more_than:.1f}%.")
+    st.write(f"The likelihood of {selected_player} getting {user_input} {statistic} or more in a game is {likelihood_more_than:.1f}%.")
