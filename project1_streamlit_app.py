@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from scipy.stats import percentileofscore
 import streamlit as st
 import requests
 import matplotlib.pyplot as plt
