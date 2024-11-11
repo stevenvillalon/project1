@@ -41,7 +41,7 @@ game_logs_df = game_logs.get_data_frames()[0]
 
 # Step 4: User selects a statistic and displays a histogram
 if not game_logs_df.empty:
-    statistic = st.selectbox("Select a Statistic", ['MIN', 'PTS', 'AST', 'OREB', 'DREB', 'REB', 'FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
+    statistic = st.selectbox("Select a Statistic", ['PTS', 'AST', 'OREB', 'DREB', 'REB', 'MIN', 'FGM', 'FGA', 'FG_PCT', 'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA',
        'FT_PCT', 'STL', 'BLK', 'TOV', 'PF', 'PLUS_MINUS'])  # Selected Statistics
 
     # Plot the histogram
