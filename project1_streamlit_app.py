@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy.stats import t, percentileofscore
 import streamlit as st
 import requests
 import matplotlib.pyplot as plt
@@ -14,14 +15,14 @@ st.title("Histograms and Hoops 🏀")
 st.subheader("What are the chances your favorite NBA player will score X points?")
 st.write("This question comes up often when watching games with friends. Using some basic statistical tools, we can actually answer this question...for points and a number of other basketball stats.")
 st.markdown("<p style='color:red;'>This tool uses data from the 2023-2024 NBA regular season. I will update with data from the current season when teams have played more games.</p>", unsafe_allow_html=True)
-st.markdown("App Created by [Steven Villalon](mailto:steven.villalon@gmail.com)  \nSource: NBA API")
+st.markdown("Created by: [Steven Villalon](mailto:steven.villalon@gmail.com)  \nSource: NBA API")
 st.markdown("---")
 
 
 # Step 1: User selects an NBA team
 teams_df = teams_df.sort_values('full_name')
 team_names = teams_df['full_name'].tolist()
-selected_team = st.selectbox("Select a Team", team_names)
+selected_team = st.selectbox("Select a Team", team_names, index=team_names.index("Los Angeles Lakers"))
 
 # Filter players based on the selected team
 team_id = teams_df[teams_df['full_name'] == selected_team]['id'].values[0]
@@ -29,7 +30,7 @@ filtered_players = players_df[players_df['TeamID'] == team_id].sort_values('PLAY
 player_names = filtered_players['PLAYER'].tolist()
 
 # Step 2: User selects a player
-selected_player = st.selectbox("Select a Player", player_names)
+selected_player = st.selectbox("Select a Player", player_names, index=player_names.index("LeBron James"))
 
 # Get the player ID for the selected player
 player_id = filtered_players[filtered_players['PLAYER'] == selected_player]['PLAYER_ID'].values[0]
@@ -88,7 +89,7 @@ else:
     max_stat = np.max(game_logs_df[statistic])
     total_games = len(game_logs_df[statistic])
 
-    if total_games < 40:
+    if total_games < 30:
         st.markdown(f'<p style="color:red;">Warning: only {total_games} games in dataset.</p>', unsafe_allow_html=True)
     else:
         st.write(f"Games played = {total_games}")
@@ -97,14 +98,30 @@ else:
     st.write(f"Minimum {stat_names[statistic]} = {min_stat}")
     st.write(f"Maximum {stat_names[statistic]} = {max_stat}")
 
-    # Step 5: Add a number input box
+    # Step 5: Add Confidence Intervals
+    # Calculate the Margin of Error (MOE)
+    if total_games >= 30:
+        alpha = 0.05
+        deg_freedom = total_games - 1
+        critical_value = t.ppf(1 - (alpha / 2), deg_freedom)
+        std_dev = np.std(game_logs_df[statistic], ddof=1)
+        moe = critical_value * (std_dev / np.sqrt(total_games))
+        
+        lower_bound = round(mean_stat - moe, 1)
+        upper_bound = round(mean_stat + moe, 1)
+
+        st.markdown(f"**<h5 style='color:green'>In the short-term (2-3 games), we are 95% confident that {selected_player} will average between {lower_bound} and {upper_bound} {stat_names[statistic]} per game.</h5>**", unsafe_allow_html=True)
+    else:
+        st.markdown(f'<p style="color:red;">Not enough games to calculate a valid prediction interval.</p>', unsafe_allow_html=True)
+
+
+    # Step 6: Add a number input box
     st.header("Make a Prediction")
-    user_input = st.number_input(f"Enter {stat_names[statistic]} value to calculate a prediction:", min_value=0, step=1)
+    user_input = st.number_input(f"Enter {stat_names[statistic]} value to calculate a prediction:", value = 25, min_value=0, step=1)
 
-    # Step 6: Calculate the quantile using numpy
-    less_than_input = np.sum(game_logs_df[statistic] < user_input)
 
-    # Calculate the likelihood of scoring more than the input
-    likelihood_more_than = (total_games - less_than_input) / total_games * 100
+    # Step 7: Calculate the quantile of the user input
+    percent_below = percentileofscore(game_logs_df[statistic], user_input)
+    prediction = 100 - percent_below
 
-    st.write(f"The likelihood of {selected_player} getting {user_input} {stat_names[statistic]} or more in a game is {likelihood_more_than:.1f}%.")
+    st.markdown(f"**<h5 style='color:green'>The likelihood of {selected_player} getting {user_input} {stat_names[statistic]} or more in a game is {prediction:.1f}%.</h5>**", unsafe_allow_html=True)
