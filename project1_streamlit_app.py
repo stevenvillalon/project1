@@ -122,7 +122,7 @@ else:
 
 
     # Step 7: Calculate the quantile of the user input
-    percent_below = percentileofscore(game_logs_df[statistic], user_input)
+    percent_below = percentileofscore(game_logs_df[statistic], user_input, kind = "strict")
     prediction = 100 - percent_below
 
     st.markdown(f"**<h5 style='color:green'>The likelihood of {selected_player} getting {user_input} {stat_names[statistic]} or more in a game is {prediction:.1f}%.</h5>**", unsafe_allow_html=True)
