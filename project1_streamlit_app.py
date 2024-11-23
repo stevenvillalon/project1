@@ -30,7 +30,8 @@ filtered_players = players_df[players_df['TeamID'] == team_id].sort_values('PLAY
 player_names = filtered_players['PLAYER'].tolist()
 
 # Step 2: User selects a player
-selected_player = st.selectbox("Select a Player", player_names, index=player_names.index("LeBron James"))
+default_player = player_names[0] if "LeBron James" not in player_names else "LeBron James"
+selected_player = st.selectbox("Select a Player", player_names, index=player_names.index(default_player))
 
 # Get the player ID for the selected player
 player_id = filtered_players[filtered_players['PLAYER'] == selected_player]['PLAYER_ID'].values[0]
