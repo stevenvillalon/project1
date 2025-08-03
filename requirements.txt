@@ -6,3 +6,4 @@ matplotlib
 nba_api
 setuptools
 scipy
+plotly
