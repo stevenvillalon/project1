@@ -11,15 +11,16 @@ teams_df = pd.read_csv('nba_teams.csv')
 players_df = pd.read_csv('nba_players.csv')
 
 # Streamlit app header
+st.set_page_config(page_title="NBA Stats App | Histograms and Hoops | Steven Villalon", layout="wide")
 st.title("Histograms and Hoops 🏀")
 st.subheader("What are the chances your favorite NBA player will score X points?")
 st.write("This question comes up often when watching games with friends. Using some basic statistical tools, we can actually answer this question...for points and a number of other basketball stats.")
-st.markdown("<p style='color:yellow;'>UPDATE! This tool is now using data from the 2024-2025 NBA regular season.</p>", unsafe_allow_html=True)
-st.markdown("Created by: [Steven Villalon](mailto:steven.villalon@gmail.com)  \nSource: NBA API")
+st.markdown("<p style='color:yellow;'>UPDATE! Includes trades and free agent signings through Aug 2, 2025.<br>Next update after teams reach ~20 games in the '25-26 season.</p>", unsafe_allow_html=True)
+st.markdown("Created by: [Steven Villalon](mailto:svillal2@nd.edu)  \nSource: NBA API")
 st.markdown("---")
 
 
-# Step 1: Select an NBA team
+# Step 1: Select a team
 teams_df = teams_df.sort_values('full_name')
 team_names = teams_df['full_name'].tolist()
 selected_team = st.selectbox("Select a Team", team_names, index=team_names.index("Los Angeles Lakers"))
@@ -39,7 +40,7 @@ player_id = filtered_players[filtered_players['PLAYER'] == selected_player]['PLA
 
 
 # Step 3: Get player logs for selected player
-game_logs = playergamelog.PlayerGameLog(player_id=player_id, season='2024', season_type_all_star='Regular Season')
+game_logs = playergamelog.PlayerGameLog(player_id=player_id, season='2024-25', season_type_all_star='Regular Season')
 game_logs_df = game_logs.get_data_frames()[0]
 
 
@@ -134,3 +135,8 @@ else:
     prediction = 100 - percent_below
 
     st.markdown(f"**<h5 style='color:green'>The likelihood of {selected_player} getting {user_input} {stat_names[statistic]} or more in a game is {prediction:.1f}%.</h5>**", unsafe_allow_html=True)
+    
+
+st.markdown("***")
+st.markdown(
+        "©Copyright 2025, Steven Villalon | Thanks for trying my app! Check out my [Data Science Portfolio](https://stevenvillalon.github.io/portfolio/) to see more of my work.")
