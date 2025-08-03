@@ -6,18 +6,19 @@ import requests
 import matplotlib.pyplot as plt
 from nba_api.stats.endpoints import playergamelog
 
-# Load the team and player CSV files
-teams_df = pd.read_csv('nba_teams.csv')
-players_df = pd.read_csv('nba_players.csv')
-
 # Streamlit app header
 st.set_page_config(page_title="NBA Stats App | Histograms and Hoops | Steven Villalon", layout="wide")
+st.caption("Updated Aug 2, 2025 — v1.1")
 st.title("Histograms and Hoops 🏀")
 st.subheader("What are the chances your favorite NBA player will score X points?")
 st.write("This question comes up often when watching games with friends. Using some basic statistical tools, we can actually answer this question...for points and a number of other basketball stats.")
-st.markdown("<p style='color:yellow;'>UPDATE! Includes trades and free agent signings through Aug 2, 2025.<br>Next update after teams reach ~20 games in the '25-26 season.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:yellow;'>Uses data from the 2024-25 regular season. Next update after teams play ~20 games in the 2025-26 season.</p>", unsafe_allow_html=True)
 st.markdown("Created by: [Steven Villalon](mailto:svillal2@nd.edu)  \nSource: NBA API")
 st.markdown("---")
+
+# Step 0: Load the team and player CSV files
+teams_df = pd.read_csv('nba_teams.csv')
+players_df = pd.read_csv('nba_players.csv')
 
 
 # Step 1: Select a team
